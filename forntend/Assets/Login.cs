@@ -8,34 +8,28 @@ public class Login : MonoBehaviour
 {
     public void DoLogin() {
 
+        Debug.Log("Iniciando login...");
+
+         StartCoroutine(callLoginTeste());
         // A correct website page.
-        StartCoroutine(GetRequest("https://www.example.com"));
-
+        //StartCoroutine(GetRequest("https://www.example.com"));
         // A non-existing page.
-        StartCoroutine(GetRequest("https://error.html"));
-
-        //callLoginTeste();
-
-        /*Text mensagem = transform.Find("Mensagem").GetComponent<Text>();
-
-        if (mensagem != null )
-        {
-             mensagem.text = "Logou...";
-        }
-        else {
-            Debug.Log("Não encontrou objeto mensagem!");
-        }*/
+        //StartCoroutine(GetRequest("https://error.html"));
     }
 
     public IEnumerator callLoginTeste()
     {
         Debug.Log("Logando...");
 
-        WWWForm form = new WWWForm();
-        form.AddField("username","isa");
-        form.AddField("password","123456");
-        UnityWebRequest www = UnityWebRequest.Post("https://busanello.dataparerp.com/",form);
-        yield return www.Send();
+        string bodyJsonString = "{\"username\":\"isa\",\"password\":\"123456\"}";
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(bodyJsonString);
+
+        UnityWebRequest www = new UnityWebRequest("http://localhost:8080/api/auth/signin", "POST");
+        www.uploadHandler = (UploadHandler) new UploadHandlerRaw(bodyRaw);
+        www.downloadHandler = (DownloadHandler) new DownloadHandlerBuffer();
+
+        www.SetRequestHeader("Content-Type", "application/json");
+        yield return www.SendWebRequest();
         if (www.error != null) {
             Debug.Log("Error: "+www.error);
         } else {
