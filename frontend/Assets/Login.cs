@@ -6,17 +6,36 @@ using UnityEngine.Networking;
 
 public class Login : MonoBehaviour
 {
-    public void DoLogin() {
+
+    private InputField username;
+    private InputField password;
+    private Text mensagem;
+
+
+    void Start()
+    {
+        username = GameObject.Find("Email").GetComponent<InputField>();
+        password = GameObject.Find("Senha").GetComponent<InputField>();
+        mensagem = GameObject.Find("Mensagem").GetComponent<Text>();
+    }
+
+    public void DoLogin()
+    {
         Debug.Log("Iniciando login...");
-        StartCoroutine(callLoginTeste());
+
+        if ( LoginVerification() )
+        {
+            StartCoroutine(callLoginTeste());
+        }
     }
 
     public IEnumerator callLoginTeste()
     {
-        Debug.Log("Logando...");
+        Debug.Log("Logando: "+username.text+"/"+password.text+"...");
+        mensagem.text = "Verificando login para usuário: "+username.text;
 
         // Preparando JSON para o request
-        string bodyJsonString = "{\"username\":\"isa\",\"password\":\"123456\"}";
+        string bodyJsonString = "{\"username\":\""+username.text+"\",\"password\":\""+password.text+"\"}";
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(bodyJsonString);
 
         UnityWebRequest www = new UnityWebRequest("http://localhost:8080/api/auth/signin", "POST");
@@ -27,9 +46,27 @@ public class Login : MonoBehaviour
         yield return www.SendWebRequest();
         if (www.error != null) {
             Debug.Log("Error: "+www.error);
+             mensagem.text = "Usuário não autorizado!";
+
         } else {
             Debug.Log("Response: "+www.downloadHandler.text);
+            mensagem.text = "Bem-vindo "+username.text+" !";
         }
+    }
+
+    bool LoginVerification() {
+        string aviso = "";
+        if ( username.text == "" ) {
+            aviso = aviso + "Usuário inválido / ";
+        }
+        if ( password.text == "" ) {
+            aviso = aviso + "Senha inválida / ";
+        }
+        if ( aviso != "")
+        {
+            mensagem.text = aviso;
+        }
+        return  username.text != "" && password.text!= "";
     }
 
 
